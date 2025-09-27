@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Price Checks — No Blank Pages</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="appHeader">
+    <h1>Price Checks — Filenames as Titles</h1>
+    <div class="controls">
+      <label class="file">
+        <input id="imagesInput" type="file" accept="image/*" multiple>
+        <span>Select Images</span>
+      </label>
+
+      <div class="group">
+        <label class="range">
+          <span>Preview max-height (px):</span>
+          <input id="sizeRange" type="range" min="280" max="1200" value="435">
+          <output id="sizeOut">560</output>
+        </label>
+        <label class="range">
+          <span>Title → Photo (px):</span>
+          <input id="spaceTPRange" type="range" min="0" max="80" value="10">
+          <output id="spaceTPOut">8</output>
+        </label>
+        <label class="range">
+          <span>Photo → Next Title (px):</span>
+          <input id="spacePTRange" type="range" min="0" max="120" value="40">
+          <output id="spacePTOut">20</output>
+        </label>
+        <label class="range">
+          <span>Print image max-height (in):</span>
+          <input id="printInRange" type="range" min="3.0" max="6.0" step="0.05" value="4.00">
+          <output id="printInOut">4.35</output>
+        </label>
+        <label class="check">
+          <input id="guardToggle" type="checkbox" checked>
+          <span>Always fit 2 per page (auto-shrink)</span>
+        </label>
+      </div>
+
+      <button id="printBtn" disabled>Print / Save PDF</button>
+      <button id="clearBtn">Reset</button>
+    </div>
+  </header>
+
+  <section class="tips">
+    <details open>
+      <summary>How it works</summary>
+      <ul>
+        <li>Select or drop your images (titles auto‑generated from filenames).</li>
+        <li>Click a photo to crop; handles appear; double‑click or Apply to save.</li>
+        <li>Guard ON: auto-shrinks print images so 2 items always fit per Letter page.</li>
+      </ul>
+    </details>
+  </section>
+
+  <main id="pages" class="pages">
+    <div class="dropzone" id="dropZone">
+      <p>Drag & drop images here, or use the button above.</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Runs 100% in your browser — host on Netlify/GitHub Pages for free.</p>
+  </footer>
+
+  <!-- Crop Modal -->
+  <div id="cropModal" class="modal hidden" aria-hidden="true" role="dialog" aria-label="Crop image">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <strong id="cropTitle">Crop</strong>
+        <div class="modal-actions">
+          <button id="cropCancelBtn">Cancel</button>
+          <button id="cropApplyBtn">Apply Crop</button>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="cropCanvas" width="900" height="600"></canvas>
+      </div>
+      <div class="hint">Drag handles or the box to adjust. Double‑click to apply.</div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

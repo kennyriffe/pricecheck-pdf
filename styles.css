@@ -1,0 +1,209 @@
+/* No-blank-pages build */
+:root {
+  --max-width: 960px;
+  --gap: 16px;
+  --title-size: 15pt;
+  --preview-img-height: 560px;
+  --space-title-to-photo: 8px;
+  --space-photo-to-next: 20px;
+  --header-height: 140px;
+  --print-img-max-height: 4.35in;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  margin: 0 auto;
+  padding: 0 16px 16px 16px;
+  max-width: var(--max-width);
+  color: #111;
+  background: #fff;
+  line-height: 1.35;
+  padding-top: calc(var(--header-height) + 10px);
+}
+
+header#appHeader {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: calc(var(--max-width) + 32px);
+  max-width: 100vw;
+  background: #ffffffee;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-bottom: 1px solid #e5e5e5;
+  padding: 12px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+h1 { font-size: 20pt; margin: 0 0 8px; }
+
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+button, .file span {
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+/* Word-blue "Select Images" button */
+:root {
+  /* pick your favorite Word blue */
+  --word-blue: #2B579A; /* classic Word */
+  /* or try a newer shade: #185ABD */
+}
+/* --- Button colors: Print = Green, Reset = Red --- */
+:root {
+  /* Greens for Print */
+  --btn-green: #16a34a;       /* base  */
+  --btn-green-hover: #15803d; /* hover */
+  --btn-green-active: #166534;/* active */
+  --btn-green-border: #146c43;
+
+  /* Reds for Reset */
+  --btn-red: #dc2626;         /* base  */
+  --btn-red-hover: #b91c1c;   /* hover */
+  --btn-red-active: #991b1b;  /* active */
+  --btn-red-border: #7f1d1d;
+}
+
+/* Print / Save PDF (green) */
+#printBtn{
+  background: var(--btn-green);
+  color: #fff;
+  border-color: var(--btn-green-border);
+  box-shadow: none !important;      /* remove translucent overlay */
+  opacity: 1 !important;            /* just in case a parent sets opacity */
+}
+
+#printBtn:hover  { background: var(--btn-green-hover) !important; color: #fff !important; }
+#printBtn:active { background: var(--btn-green-active) !important; color: #fff !important; }
+
+/* Reset (red) */
+#clearBtn{
+  background: var(--btn-red);
+  color: #ffffff;
+  border-color: var(--btn-red-border);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.12);
+}
+#clearBtn:hover{ background: var(--btn-red-hover); }
+#clearBtn:active{ background: var(--btn-red-active); }
+
+/* Accessibility: focus rings & disabled look */
+button:focus-visible{ outline: 2px solid #93c5fd; outline-offset: 2px; }
+button[disabled]{ opacity: .6; cursor: not-allowed; }
+
+.file span {
+  background: var(--word-blue);
+  color: #ffffff;
+  border-color: #1e3f75;          /* a bit darker than the fill */
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.1);
+}
+
+.file span:hover {
+  background: #1f4a88;           /* hover */
+  border-color: #183b6d;
+}
+
+.file span:active {
+  background: #1b427a;           /* active/pressed */
+  border-color: #153662;
+}
+
+.file input:focus + span,
+.file span:focus-visible {
+  outline: 2px solid #93c5fd;    /* accessible focus ring */
+  outline-offset: 2px;
+}
+
+.file input { display: none; }
+.group { display: inline-flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.range { display: inline-flex; align-items: center; gap: 8px; }
+.range input[type=range] { width: 160px; }
+.range output { min-width: 42px; text-align: right; display: inline-block; }
+.check { display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+
+.tips { margin: 12px 0; }
+
+.dropzone {
+  border: 2px dashed #cfcfcf;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  transition: background 0.2s ease;
+}
+.dropzone.dragover { background: #fafafa; }
+
+.pages { display: grid; gap: 16px; }
+.page {
+  border: 1px dashed #e5e5e5;
+  border-radius: 10px;
+  padding: 12px 12px 4px 12px;
+}
+.page-inner { display: grid; gap: var(--space-photo-to-next); }
+
+.pair { page-break-inside: avoid; break-inside: avoid; position: relative; }
+.pair h2 {
+  font-size: var(--title-size);
+  margin: 0 0 var(--space-title-to-photo);
+  font-weight: 700;
+}
+.pair img {
+  max-width: 100%;
+  height: auto;
+  max-height: var(--preview-img-height);
+  display: block;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin: 0 0 var(--space-photo-to-next);
+  cursor: crosshair;
+}
+
+footer { margin-top: 20px; }
+
+/* Crop modal */
+.modal { position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,0.45); display: grid; place-items: center; }
+.modal.hidden { display: none; }
+.modal-inner { background:#fff; width:min(98vw,1100px); max-height:96vh; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.25); display:grid; grid-template-rows:auto 1fr auto; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid #eee; }
+.modal-actions button { margin-left:8px; }
+.canvas-wrap { overflow:auto; padding:10px; }
+#cropCanvas { display:block; max-width:100%; height:auto; border:1px solid #ddd; border-radius:6px; background:#111; }
+.hint { font-size:12px; color:#555; padding:8px 14px 12px; }
+
+/* PRINT — stricter rules to avoid blank pages */
+@media print {
+  @page { size: Letter; margin: 0.5in; }
+  header, .tips, footer, .modal { display: none !important; }
+  html, body { height: auto; overflow: visible; }
+  body { padding: 0; }
+
+  /* Switch grid → block to avoid some Chromium grid pagination bugs */
+  .page-inner { display: block; }
+  .pair { break-inside: avoid; page-break-inside: avoid; margin-bottom: var(--space-photo-to-next); }
+
+  .page {
+    border: none;
+    padding: 0;
+    break-after: page;           /* modern */
+    page-break-after: always;    /* legacy */
+    overflow: visible;
+  }
+
+  /* Prevent a blank sheet after the final page */
+  .page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .pair h2 { font-size: 13pt; margin: 0 0 var(--space-title-to-photo); }
+  .pair img {
+    max-height: var(--print-img-max-height);
+    border-width: 0.5px;
+    margin: 0 0 var(--space-photo-to-next);
+  }
+}
