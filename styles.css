@@ -3,6 +3,7 @@
   --max-width: 960px;
   --gap: 16px;
   --title-size: 15pt;
+  --page-title-size: 18pt;
   --preview-img-height: 560px;
   --space-title-to-photo: 8px;
   --space-photo-to-next: 20px;
@@ -125,6 +126,14 @@ button[disabled]{ opacity: .6; cursor: not-allowed; }
 .range input[type=range] { width: 160px; }
 .range output { min-width: 42px; text-align: right; display: inline-block; }
 .check { display: inline-flex; align-items: center; gap: 8px; user-select: none; }
+.text { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
+.text input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 220px;
+}
 
 .tips { margin: 12px 0; }
 
@@ -145,6 +154,17 @@ button[disabled]{ opacity: .6; cursor: not-allowed; }
   padding: 12px 12px 4px 12px;
 }
 .page-inner { display: grid; gap: var(--space-photo-to-next); }
+
+.page-title-block {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  margin: 0 0 var(--space-photo-to-next);
+}
+.page-title-block h2 {
+  font-size: var(--page-title-size);
+  margin: 0;
+  font-weight: 700;
+}
 
 .pair { page-break-inside: avoid; break-inside: avoid; position: relative; }
 .pair h2 {
