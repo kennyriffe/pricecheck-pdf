@@ -11,8 +11,13 @@
     <h1>Price Checks — Filenames as Titles</h1>
     <div class="controls">
       <label class="file">
-        <input id="imagesInput" type="file" accept="image/*" multiple>
+        <input id="imagesInput" type="file" accept="image/*,.pdf" multiple>
         <span>Select Images</span>
+      </label>
+
+      <label class="text">
+        <span>Page title (optional):</span>
+        <input id="pageTitleInput" type="text" placeholder="Enter a page title">
       </label>
 
       <div class="group">
@@ -85,6 +90,12 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha512-Ikk4SsA0O7u36cV8PePCm/Zou31opJkFn0zT3eSCOiZoW0jZUrbakJhRr5Pd6Y/h2ap4hDsSAXBVycqiqXd9Ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

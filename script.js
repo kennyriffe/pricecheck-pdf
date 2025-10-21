@@ -3,6 +3,7 @@ const imagesInput = document.getElementById('imagesInput');
 const printBtn = document.getElementById('printBtn');
 const clearBtn = document.getElementById('clearBtn');
 const pagesEl = document.getElementById('pages');
+const pageTitleInput = document.getElementById('pageTitleInput');
 const sizeRange = document.getElementById('sizeRange');
 const sizeOut = document.getElementById('sizeOut');
 const spaceTPRange = document.getElementById('spaceTPRange');
@@ -39,6 +40,7 @@ function resetApp() {
   // 2) Clear images + UI
   images = [];
   imagesInput.value = '';
+  pageTitleInput.value = '';
   pagesEl.innerHTML =
     '<div class="dropzone" id="dropZone"><p>Drag & drop images here, or use the button above.</p></div>';
   printBtn.disabled = true;
@@ -63,6 +65,7 @@ function chunk(arr, size) { const out = []; for (let i = 0; i < arr.length; i +=
 
 function renderTwoUp(list) {
   pagesEl.innerHTML = '';
+  const docTitle = pageTitleInput.value.trim();
   if (!list.length) {
     pagesEl.innerHTML = '<div class="dropzone" id="dropZone"><p>Drag & drop images here, or use the button above.</p></div>';
     printBtn.disabled = true;
@@ -71,12 +74,22 @@ function renderTwoUp(list) {
   printBtn.disabled = false;
 
   const pages = chunk(list, 2);
+  let isFirstPage = true;
   for (const pageImages of pages) {
     if (!pageImages.length) continue;
     const page = document.createElement('section');
     page.className = 'page';
     const inner = document.createElement('div');
     inner.className = 'page-inner';
+
+    if (isFirstPage && docTitle) {
+      const titleWrap = document.createElement('header');
+      titleWrap.className = 'page-title-block';
+      const heading = document.createElement('h2');
+      heading.textContent = docTitle;
+      titleWrap.appendChild(heading);
+      inner.appendChild(titleWrap);
+    }
 
     for (const img of pageImages) {
       const sec = document.createElement('div');
@@ -97,6 +110,7 @@ function renderTwoUp(list) {
 
     page.appendChild(inner);
     pagesEl.appendChild(page);
+    isFirstPage = false;
   }
 }
 
@@ -114,8 +128,11 @@ function recalcGuard() {
   const spaceTP_in = pxToIn(spaceTP_px);
   const spacePT_in = pxToIn(spacePT_px);
   const printable_in = 10.0;
+  const hasDocTitle = pageTitleInput.value.trim().length > 0;
   const title_in = (13/72) + 0.04;
-  const fixed_in = (2*title_in) + (2*spaceTP_in) + (2*spacePT_in);
+  const docTitle_in = hasDocTitle ? (18/72) + 0.04 : 0;
+  const docGap_in = hasDocTitle ? spacePT_in : 0;
+  const fixed_in = docTitle_in + docGap_in + (2*title_in) + (2*spaceTP_in) + (2*spacePT_in);
   const fudge_in = 0.2;
   let allowed_img_in = (printable_in - fixed_in - fudge_in) / 2;
   const user_in = parseFloat(printInRange.value);
@@ -137,9 +154,14 @@ window.addEventListener('resize', computeHeaderHeight);
 imagesInput.addEventListener('change', async (e) => {
   if (!e.target.files.length) return;
   const files = Array.from(e.target.files);
-  images = await loadImages(files);
-  renderTwoUp(images);
-  requestAnimationFrame(computeHeaderHeight);
+  const loaded = await loadImages(files);
+  if (loaded.length) {
+    images = images.concat(loaded);
+    renderTwoUp(images);
+    maybeRecalcGuard();
+    requestAnimationFrame(computeHeaderHeight);
+  }
+  imagesInput.value = '';
 });
 ;['dragenter','dragover'].forEach(ev => {
   pagesEl.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation();
@@ -152,21 +174,35 @@ imagesInput.addEventListener('change', async (e) => {
 pagesEl.addEventListener('drop', async (e) => {
   const files = [...e.dataTransfer.files];
   if (!files.length) return;
-  images = await loadImages(files);
+  const loaded = await loadImages(files);
+  if (loaded.length) {
+    images = images.concat(loaded);
+    renderTwoUp(images);
+    maybeRecalcGuard();
+    requestAnimationFrame(computeHeaderHeight);
+  }
+});
+pageTitleInput.addEventListener('input', () => {
   renderTwoUp(images);
+  maybeRecalcGuard();
   requestAnimationFrame(computeHeaderHeight);
 });
 async function loadImages(files) {
   const out = [];
   for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
-    const url = URL.createObjectURL(file);
-    const dim = await getImageDimensions(url).catch(()=>null);
-    if (!dim) continue;
-    out.push({ file, name: file.name, title: titleFromFilename(file.name), url, natural: dim });
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      const dim = await getImageDimensions(url).catch(() => null);
+      if (!dim) continue;
+      out.push({ file, name: file.name, title: titleFromFilename(file.name), url, natural: dim });
+    } else if (isPdfFile(file)) {
+      const pdfImages = await loadPdfPages(file).catch(() => []);
+      out.push(...pdfImages);
+    }
   }
   return out;
 }
+function isPdfFile(file) { return file.type === 'application/pdf' || /\.pdf$/i.test(file.name); }
 function getImageDimensions(objectUrl) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -174,6 +210,36 @@ function getImageDimensions(objectUrl) {
     img.onerror = () => reject('decode error');
     img.src = objectUrl;
   });
+}
+async function loadPdfPages(file) {
+  if (typeof pdfjsLib === 'undefined') {
+    console.warn('PDF.js library not available; skipping PDF file import.');
+    return [];
+  }
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  const pages = [];
+  const baseTitle = titleFromFilename(file.name);
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 2 });
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: context, viewport }).promise;
+    const dataUrl = canvas.toDataURL('image/png');
+    pages.push({
+      file,
+      name: `${file.name}#page${pageNum}`,
+      title: pdf.numPages > 1 ? `${baseTitle} — Page ${pageNum}` : baseTitle,
+      url: dataUrl,
+      natural: { w: canvas.width, h: canvas.height }
+    });
+  }
+  if (typeof pdf.cleanup === 'function') pdf.cleanup();
+  if (typeof pdf.destroy === 'function') await pdf.destroy();
+  return pages;
 }
 
 // Pre‑print: recalc guard, drop any empty pages, force layout flush
